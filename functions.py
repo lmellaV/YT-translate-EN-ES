@@ -69,64 +69,80 @@ def translate_file_en_es(input_path, output_path, max_chars=800):
 
     print("✅ Traducción completada. Guardado en:", output_path)
 
-from reportlab.lib.pagesizes import A5, landscape
+from reportlab.lib.pagesizes import A5, portrait
 from reportlab.lib.units import cm
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
-from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
-def make_pdf_book(input_path, output_pdf_path, title="YouTube Transcript Translation"):
+# Registrar fuente Times New Roman
+pdfmetrics.registerFont(TTFont('Times-Roman', 'times.ttf'))  # asegúrate de tener "times.ttf" en tu carpeta
 
-    # Leer el texto
-    with open(input_path, 'r', encoding='utf-8') as f:
-        text = f.read().strip()
+# Ruta de salida
+output_pdf_path = "documento_lindo.pdf"
 
-    # Crear documento PDF
-    doc = SimpleDocTemplate(
-        output_pdf_path,
-        pagesize=landscape(A5),
-        leftMargin=2*cm,
-        rightMargin=2*cm,
-        topMargin=1.5*cm,
-        bottomMargin=1.5*cm
-    )
+# Crear documento vertical con márgenes estéticos
+doc = SimpleDocTemplate(
+    output_pdf_path,
+    pagesize=portrait(A5),
+    leftMargin=2*cm,
+    rightMargin=2*cm,
+    topMargin=2*cm,
+    bottomMargin=2*cm
+)
 
-    styles = getSampleStyleSheet()
-    story = []
+# Estilos personalizados
+styles = getSampleStyleSheet()
 
-    # Estilo para el título
-    title_style = ParagraphStyle(
-        name="TitleStyle",
-        fontSize=20,
-        leading=24,
-        alignment=TA_CENTER,
-        spaceAfter=20
-    )
+styles.add(ParagraphStyle(
+    name='TituloBonito',
+    fontName='Times-Roman',
+    fontSize=18,
+    leading=22,
+    alignment=1,  # centrado
+    spaceAfter=12,
+))
 
-    # Estilo del texto principal
-    body_style = ParagraphStyle(
-        name="BodyStyle",
-        parent=styles["Normal"],
-        fontSize=11,
-        leading=14,
-        alignment=TA_JUSTIFY,
-    )
+styles.add(ParagraphStyle(
+    name='TextoNormal',
+    fontName='Times-Roman',
+    fontSize=12,
+    leading=16,
+    alignment=4,  # justificado
+    spaceAfter=8,
+))
 
-    # Agregar título
-    story.append(Paragraph(title, title_style))
-    story.append(Spacer(1, 12))
+styles.add(ParagraphStyle(
+    name='Cita',
+    fontName='Times-Roman',
+    fontSize=11,
+    leading=14,
+    leftIndent=1*cm,
+    rightIndent=1*cm,
+    textColor='gray',
+    italic=True,
+))
 
-    # Dividir texto en párrafos
-    paragraphs = text.split("\n")
-    for p in paragraphs:
-        if p.strip():
-            story.append(Paragraph(p.strip(), body_style))
-            story.append(Spacer(1, 8))
+# Contenido del documento
+story = []
 
-    # Agregar salto de página opcional si el texto es largo
-    if len(paragraphs) > 80:
-        story.append(PageBreak())
+story.append(Paragraph("Mi Libro Bonito en PDF", styles['TituloBonito']))
+story.append(Spacer(1, 12))
+story.append(Paragraph(
+    "Este es un ejemplo de documento generado con ReportLab. "
+    "El texto está justificado, con márgenes suaves y tipografía Times New Roman.",
+    styles['TextoNormal']
+))
+story.append(Spacer(1, 8))
+story.append(Paragraph(
+    "“El diseño limpio y el formato adecuado hacen la lectura más agradable.”",
+    styles['Cita']
+))
+story.append(PageBreak())
+story.append(Paragraph("Segunda página", styles['TituloBonito']))
+story.append(Paragraph("Aquí podrías continuar con tu texto...", styles['TextoNormal']))
 
-    # Construir PDF
-    doc.build(story)
-    print("📖 PDF generado como libro en:", output_pdf_path)
+# Generar PDF
+doc.build(story)
+print("PDF creado con éxito:", output_pdf_path)
