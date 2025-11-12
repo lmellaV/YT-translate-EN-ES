@@ -1,0 +1,5 @@
+youtube-transcript-api==1.2.3
+transformers==4.40.1
+torch==2.2.0+cpu
+sentencepiece==0.2.1
+reportlab==4.4.4
